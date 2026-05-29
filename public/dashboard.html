@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="HealthBuddy Dashboard — Health analytics, symptom history timeline, PDF reports, and appointment management.">
+  <meta name="theme-color" content="#0a0f1e">
+  <title>HealthBuddy — Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M20 10V20H10V30H20V40H30V30H40V20H30V10H20Z' fill='%2300d4aa' /></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="theme.js"></script>
+</head>
+<body>
+  <nav class="dash-nav">
+    <div class="dash-nav-left">
+      <div class="nav-logo"></div>
+      <h1>HealthBuddy</h1>
+    </div>
+    <div class="dash-nav-right">
+      <button class="nav-btn" onclick="toggleTheme()">Theme</button>
+      <a href="/family" class="nav-btn">👨‍👩‍👧‍👦 Family</a>
+      <a href="/chat" class="nav-btn">Chat</a>
+      <a href="/map" class="nav-btn">Map</a>
+      <button class="nav-btn logout-nav-btn" id="logoutBtn">Logout</button>
+    </div>
+  </nav>
+
+  <div class="dashboard-container">
+    <!-- Welcome -->
+    <div class="welcome-section">
+      <div class="welcome-text">
+        <h2>Welcome, <span id="userName">User</span>!</h2>
+        <p>Your health overview & analytics</p>
+      </div>
+      <div class="welcome-stats">
+        <div class="stat-card"><span class="stat-icon"></span><div class="stat-info"><span class="stat-number" id="totalTriages">0</span><span class="stat-label">AI Triages</span></div></div>
+        <div class="stat-card"><span class="stat-icon"></span><div class="stat-info"><span class="stat-number" id="totalAppointments">0</span><span class="stat-label">Appointments</span></div></div>
+        <div class="stat-card"><span class="stat-icon"></span><div class="stat-info"><span class="stat-number" id="totalReminders">0</span><span class="stat-label">Reminders</span></div></div>
+        <div class="stat-card emergency-stat"><span class="stat-icon"></span><div class="stat-info"><span class="stat-number" id="emergencyCount">0</span><span class="stat-label">Emergencies</span></div></div>
+      </div>
+    </div>
+
+    <!-- Why This Matters -->
+    <div class="dash-section impact-section">
+      <div class="section-header"><h3>Why This Matters</h3></div>
+      <div class="impact-grid">
+        <div class="impact-card"><span class="impact-icon"></span><h4>Healthcare Access</h4><p>60% of rural India lacks easy access to healthcare. HealthBuddy bridges this gap with AI triage.</p></div>
+        <div class="impact-card"><span class="impact-icon"></span><h4>Language Barrier</h4><p>Supporting 30+ languages ensures no one is left behind due to language barriers.</p></div>
+        <div class="impact-card"><span class="impact-icon"></span><h4>Speed Saves Lives</h4><p>Early triage and emergency detection can reduce response time by up to 40%.</p></div>
+        <div class="impact-card"><span class="impact-icon"></span><h4>Data-Driven Health</h4><p>Personal health analytics help predict and prevent recurring illnesses.</p></div>
+      </div>
+    </div>
+
+    <!-- Health Analytics -->
+    <div class="dash-section">
+      <div class="section-header"><h3>Health Analytics</h3></div>
+      <div class="analytics-grid">
+        <div class="analytics-card">
+          <h4>Average Severity</h4>
+          <div class="big-number" id="avgSeverity">0</div>
+          <span class="big-label">/10</span>
+        </div>
+        <div class="analytics-card">
+          <h4>Top Symptoms</h4>
+          <div id="topSymptomsList" class="symptom-tags"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile -->
+    <div class="dash-section">
+      <div class="section-header"><h3>My Profile</h3><button class="edit-btn" id="editProfileBtn">Edit</button></div>
+      <div class="profile-card" id="profileCard">
+        <div class="profile-row"><span class="profile-label">Name</span><span class="profile-value" id="profileName">—</span></div>
+        <div class="profile-row"><span class="profile-label">Email</span><span class="profile-value" id="profileEmail">—</span></div>
+        <div class="profile-row"><span class="profile-label">Age</span><span class="profile-value" id="profileAge">—</span></div>
+        <div class="profile-row"><span class="profile-label">Member Since</span><span class="profile-value" id="profileDate">—</span></div>
+      </div>
+      <form class="edit-profile-form" id="editProfileForm" style="display:none;">
+        <div class="edit-row"><label for="editName">Name</label><input type="text" id="editName" required minlength="2"></div>
+        <div class="edit-row"><label for="editAge">Age</label><input type="number" id="editAge" min="0" max="150"></div>
+        <div class="edit-actions"><button type="submit" class="save-btn">Save</button><button type="button" class="cancel-edit-btn" id="cancelEditBtn">Cancel</button></div>
+        <div class="form-error" id="profileError"></div>
+      </form>
+    </div>
+
+    <!-- Health History Timeline -->
+    <div class="dash-section">
+      <div class="section-header">
+        <h3>Health History</h3>
+        <button class="edit-btn" id="downloadReportBtn">Download PDF</button>
+      </div>
+      <div id="historyGrid" class="data-grid"><div class="loading-state">Loading health history...</div></div>
+    </div>
+
+    <!-- Appointments -->
+    <div class="dash-section">
+      <div class="section-header"><h3>Appointments</h3></div>
+      <div id="appointmentsGrid" class="data-grid"><div class="loading-state">Loading...</div></div>
+    </div>
+
+    <!-- Reminders -->
+    <div class="dash-section">
+      <div class="section-header"><h3>Reminders</h3></div>
+      <div id="remindersGrid" class="data-grid"><div class="loading-state">Loading...</div></div>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>

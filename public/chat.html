@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description"
+    content="HealthBuddy Chat — AI-powered symptom triage, appointment booking, medicine reminders, and health guidance in 30+ languages.">
+  <meta name="theme-color" content="#0a0f1e">
+  <title>HealthBuddy — Chat</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M20 10V20H10V30H20V40H30V30H40V20H30V10H20Z' fill='%2300d4aa' /></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="theme.js"></script>
+</head>
+
+<body>
+  <div class="app-container">
+
+    <!-- =========== SIDEBAR =========== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand">
+          <h1>HealthBuddy</h1>
+          <p>AI Healthcare Assistant</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-main-nav">
+        <a href="/dashboard" class="sidebar-nav-item">
+          <span class="nav-icon"></span>
+          <span class="nav-label">Dashboard</span>
+        </a>
+        <a href="/map" class="sidebar-nav-item">
+          <span class="nav-icon"></span>
+          <span class="nav-label">Facility Map</span>
+        </a>
+        <a href="/chat" class="sidebar-nav-item active">
+          <span class="nav-icon"></span>
+          <span class="nav-label">AI Assistant</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-content">
+        <!-- User Info -->
+        <div class="sidebar-section">
+          <div class="user-info-card" id="userInfoCard">
+            <div class="user-avatar-sidebar"></div>
+            <div class="user-details">
+              <span class="user-name" id="sidebarUserName">Loading...</span>
+              <span class="user-email" id="sidebarUserEmail"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Daily Tip -->
+        <div class="sidebar-section">
+          <div class="daily-tip-card">
+            <div class="tip-label">Daily Health Tip</div>
+            <div class="tip-text" id="dailyTipText">Loading...</div>
+          </div>
+        </div>
+
+        <!-- Appointments -->
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Appointments</div>
+          <div id="appointmentsList">
+            <div class="empty-state">
+              <span class="empty-icon"></span>
+              <p>No upcoming appointments</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reminders -->
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Medicine Reminders</div>
+          <div id="remindersList">
+            <div class="empty-state">
+              <span class="empty-icon"></span>
+              <p>No active reminders</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Health History Timeline -->
+        <div class="sidebar-section">
+          <div class="sidebar-section-title">Health History</div>
+          <div id="historyTimeline">
+            <div class="empty-state">
+              <span class="empty-icon"></span>
+              <p>No health history yet</p>
+            </div>
+          </div>
+        </div>
+        <div class="sidebar-footer">
+          <button class="sidebar-logout-btn" id="sidebarLogout">Logout</button>
+        </div>
+    </aside>
+
+    <!-- =========== SIDEBAR OVERLAY (mobile) =========== -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- =========== MAIN CHAT AREA =========== -->
+    <main class="chat-area">
+
+      <!-- Chat Header -->
+      <header class="chat-header">
+        <div class="chat-header-left">
+          <button class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">☰</button>
+          <div class="chat-header-info">
+            <h2>HealthBuddy <span class="ai-badge">AI</span></h2>
+            <p><span class="status-dot"></span>Online — Ready to assist</p>
+          </div>
+        </div>
+        <div class="chat-header-actions">
+          <div class="aqi-display" id="aqiDisplay" title="Local Air Quality Index">
+            <span class="aqi-label">AQI:</span>
+            <span class="aqi-value" id="aqiValue">--</span>
+            <span class="aqi-status" id="aqiStatus">Loading...</span>
+          </div>
+          <button class="header-btn logout-header-btn" id="logoutBtn" aria-label="Logout" title="Logout">Logout</button>
+        </div>
+      </header>
+
+      <!-- Emergency Banner -->
+      <div class="emergency-banner" id="emergencyBanner">
+        <p>Emergency detected — Please call <strong>112/911</strong> or visit the nearest hospital immediately!</p>
+        <button id="emergencyClose" aria-label="Close">✕</button>
+      </div>
+
+      <!-- Chat Messages -->
+      <div class="chat-messages" id="chatMessages">
+        <!-- Messages rendered via JS -->
+      </div>
+
+      <!-- Typing Indicator -->
+      <div class="typing-indicator" id="typingIndicator">
+        <div class="message-avatar">
+          <span class="bot-avatar"></span>
+        </div>
+        <div class="typing-dots">
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+          <span class="typing-dot"></span>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <button class="quick-action" data-action="appointment" id="quickAppointment">
+          <span class="action-icon"></span> Book Appointment
+        </button>
+        <button class="quick-action" data-action="reminder" id="quickReminder">
+          <span class="action-icon"></span> Medicine Reminder
+        </button>
+        <button class="quick-action" data-action="health" id="quickHealth">
+          <span class="action-icon"></span> Health Tips
+        </button>
+        <button class="quick-action" data-action="dashboard">Go to Dashboard</button>
+        <button class="quick-action" data-action="facilities" id="quickFacilities">
+          <span class="action-icon"></span> Find Hospital
+        </button>
+        <button class="quick-action emergency-action" data-action="emergency" id="quickEmergency">
+          <span class="action-icon"></span> Emergency
+        </button>
+      </div>
+
+      <!-- Chat Input -->
+      <div class="chat-input-area">
+        <div class="chat-input-wrapper">
+          <textarea id="chatInput" placeholder="Describe your symptoms or ask a health question..." rows="1"
+            aria-label="Chat message input"></textarea>
+          <button class="send-btn" id="sendBtn" aria-label="Send message">➤</button>
+        </div>
+        <p class="input-hint">Press Enter to send · Shift+Enter for new line · 🎤 Voice input available</p>
+      </div>
+
+    </main>
+  </div>
+
+
+
+  <!-- Scripts (order matters) -->
+  <script src="api.js"></script>
+  <script src="storage.js"></script>
+  <script src="healthData.js"></script>
+  <script src="appointments.js"></script>
+  <script src="reminders.js"></script>
+  <script src="chatEngine.js"></script>
+  <script src="app.js"></script>
+</body>
+
+</html>

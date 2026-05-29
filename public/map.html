@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="HealthBuddy — Find nearby hospitals, clinics and pharmacies on an interactive map.">
+  <title>HealthBuddy — Facility Map</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M20 10V20H10V30H20V40H30V30H40V20H30V10H20Z' fill='%2300d4aa' /></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <link rel="stylesheet" href="map.css">
+  <script src="theme.js"></script>
+</head>
+<body>
+  <nav class="map-nav">
+    <div class="map-nav-left">
+      <div class="nav-logo"></div>
+      <h1>HealthBuddy</h1>
+      <span class="nav-divider">|</span>
+      <span class="nav-page-title">Facility Locator</span>
+    </div>
+    <div class="map-nav-right">
+      <button class="nav-btn" onclick="toggleTheme()">Theme</button>
+      <a href="/chat" class="nav-btn">Chat</a>
+      <a href="/dashboard" class="nav-btn">Dashboard</a>
+      <button class="nav-btn" id="logoutBtn">Logout</button>
+    </div>
+  </nav>
+
+  <div class="map-container">
+    <!-- Controls Panel -->
+    <div class="map-controls" id="mapControls">
+      <div class="controls-header">
+        <h3>Find Healthcare</h3>
+        <p>Search nearby facilities</p>
+      </div>
+
+      <div class="control-group">
+        <label>Showing All Facility Types</label>
+        <div style="display:flex;flex-direction:column;gap:6px;margin-top:6px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;color:var(--text-secondary)">
+            <span style="background:#00d4aa;width:14px;height:14px;border-radius:50%;display:inline-block;font-size:10px;font-weight:700;text-align:center;line-height:14px;color:#0a0f1e">H</span> Hospitals
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;color:var(--text-secondary)">
+            <span style="background:#4f9cf9;width:14px;height:14px;border-radius:50%;display:inline-block;font-size:10px;font-weight:700;text-align:center;line-height:14px;color:#0a0f1e">C</span> Clinics
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:0.8rem;color:var(--text-secondary)">
+            <span style="background:#f97316;width:14px;height:14px;border-radius:50%;display:inline-block;font-size:10px;font-weight:700;text-align:center;line-height:14px;color:#0a0f1e">P</span> Pharmacies
+          </div>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label>Search Radius</label>
+        <div class="radius-slider">
+          <input type="range" id="radiusSlider" min="1000" max="20000" value="5000" step="1000">
+          <span id="radiusValue">5 km</span>
+        </div>
+      </div>
+
+      <button class="search-btn" id="searchBtn">
+        <span>Search My Location</span>
+      </button>
+
+      <div style="margin-top:12px;text-align:center">
+        <span style="color:var(--text-muted);font-size:0.75rem">— or enter manually —</span>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input type="number" id="manualLat" placeholder="Latitude" step="any"
+          style="flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--border-color);border-radius:8px;padding:8px;color:var(--text-primary);font-size:0.8rem;outline:none">
+        <input type="number" id="manualLng" placeholder="Longitude" step="any"
+          style="flex:1;background:rgba(255,255,255,0.06);border:1px solid var(--border-color);border-radius:8px;padding:8px;color:var(--text-primary);font-size:0.8rem;outline:none">
+      </div>
+      <button id="manualSearchBtn"
+        style="width:100%;margin-top:8px;background:rgba(0,212,170,0.15);border:1px solid var(--accent-primary);border-radius:8px;color:var(--accent-primary);padding:8px;font-size:0.8rem;font-weight:600;cursor:pointer">
+        Search This Location
+      </button>
+
+      <div class="results-count" id="resultsCount" style="display:none">
+        Found <strong id="resultNum">0</strong> facilities
+      </div>
+
+      <!-- Results List -->
+      <div class="results-list" id="resultsList"></div>
+    </div>
+
+    <!-- Map -->
+    <div class="map-wrapper">
+      <div id="map" class="map-element"></div>
+      <div class="map-loading" id="mapLoading">
+        <div class="loading-spinner"></div>
+        <p>Loading map...</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="api.js"></script>
+  <script src="map.js"></script>
+</body>
+</html>

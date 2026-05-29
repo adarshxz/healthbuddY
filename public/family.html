@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="HealthBuddy Family Caregiver Dashboard — Manage family members, medicine reminders, and get AI-powered health insights.">
+  <meta name="theme-color" content="#0a0f1e">
+  <title>HealthBuddy — Family Caregiver</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><path d='M20 10V20H10V30H20V40H30V30H40V20H30V10H20Z' fill='%236366f1' /></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="family.css">
+  <script src="theme.js"></script>
+</head>
+<body>
+  <nav class="dash-nav">
+    <div class="dash-nav-left">
+      <div class="nav-logo">👨‍👩‍👧‍👦</div>
+      <h1>HealthBuddy Family</h1>
+    </div>
+    <div class="dash-nav-right">
+      <button class="nav-btn" onclick="toggleTheme()">Theme</button>
+      <a href="/dashboard" class="nav-btn">Dashboard</a>
+      <a href="/chat" class="nav-btn">Chat</a>
+      <button class="nav-btn notif-btn" id="notifToggleBtn">🔔 <span class="notif-badge" id="notifBadge" style="display:none;">0</span></button>
+      <button class="nav-btn logout-nav-btn" id="logoutBtn">Logout</button>
+    </div>
+  </nav>
+
+  <!-- ─── Main Dashboard View ─── -->
+  <div class="family-container" id="dashboardView">
+    <div class="family-header">
+      <div class="family-header-text">
+        <h2>👋 Hello, <span id="userName">Caregiver</span></h2>
+        <p>Manage your family's health from one place</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" id="addMemberBtn">➕ Add Family Member</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card purple"><div class="stat-icon-wrap purple">👥</div><div class="stat-info"><span class="stat-number" id="statMembers">0</span><span class="stat-label">Family Members</span></div></div>
+      <div class="stat-card teal"><div class="stat-icon-wrap teal">💊</div><div class="stat-info"><span class="stat-number" id="statReminders">0</span><span class="stat-label">Active Reminders</span></div></div>
+      <div class="stat-card coral"><div class="stat-icon-wrap coral">⚠️</div><div class="stat-info"><span class="stat-number" id="statMissed">0</span><span class="stat-label">Missed Today</span></div></div>
+      <div class="stat-card amber"><div class="stat-icon-wrap amber">🔔</div><div class="stat-info"><span class="stat-number" id="statAlerts">0</span><span class="stat-label">Alerts</span></div></div>
+    </div>
+
+    <!-- Members Grid -->
+    <div class="fam-section">
+      <div class="section-header"><h3>👨‍👩‍👧‍👦 Family Members</h3></div>
+      <div class="members-grid" id="membersGrid">
+        <div class="empty-state"><span class="empty-icon">👨‍👩‍👧</span><p>No family members yet. Add your first member to get started!</p></div>
+      </div>
+    </div>
+
+    <!-- Recent Notifications -->
+    <div class="fam-section">
+      <div class="section-header"><h3>🔔 Recent Alerts</h3><button class="btn-secondary" id="markAllReadBtn">Mark All Read</button></div>
+      <div id="recentAlerts" class="insights-grid">
+        <div class="empty-state"><span class="empty-icon">✅</span><p>No new alerts. Everything looks good!</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Member Detail View ─── -->
+  <div class="family-container detail-panel" id="detailView">
+    <button class="detail-back" id="backToListBtn">← Back to Family</button>
+    <div class="detail-header">
+      <div class="detail-avatar" id="detailAvatar">A</div>
+      <div class="detail-info">
+        <h2 id="detailName">Member Name</h2>
+        <p id="detailMeta">Age · Gender · Relation</p>
+      </div>
+      <div class="header-actions">
+        <button class="btn-primary" id="addReminderForBtn">💊 Add Reminder</button>
+        <button class="btn-secondary" id="editMemberBtn2">✏️ Edit</button>
+        <button class="btn-secondary" id="deleteMemberBtn" style="color:var(--accent-coral);">🗑️ Remove</button>
+      </div>
+    </div>
+
+    <!-- Health Profile + Adherence -->
+    <div class="detail-grid">
+      <div class="detail-card">
+        <h4>🏥 Health Profile</h4>
+        <ul class="detail-card-list" id="detailHealth"></ul>
+      </div>
+      <div class="detail-card">
+        <h4>📊 Adherence Overview</h4>
+        <div id="detailAdherence"></div>
+      </div>
+    </div>
+
+    <!-- Reminders -->
+    <div class="fam-section">
+      <div class="section-header"><h3>💊 Medicine Reminders</h3></div>
+      <div class="reminder-list" id="detailReminders"></div>
+    </div>
+
+    <!-- AI Insights -->
+    <div class="fam-section">
+      <div class="section-header"><h3>🤖 AI Health Insights</h3></div>
+      <div class="insights-grid" id="detailInsights"></div>
+    </div>
+  </div>
+
+  <!-- ─── Notification Panel ─── -->
+  <div class="notif-panel" id="notifPanel">
+    <div class="notif-header"><h3>🔔 Notifications</h3><button class="notif-close" id="notifCloseBtn">✕</button></div>
+    <div class="notif-list" id="notifList"><div class="notif-empty">No notifications</div></div>
+  </div>
+
+  <!-- ─── Add/Edit Member Modal ─── -->
+  <div class="modal-overlay" id="memberModal">
+    <div class="modal">
+      <div class="modal-header"><h3 id="memberModalTitle">Add Family Member</h3><button class="modal-close" id="memberModalClose">✕</button></div>
+      <div class="modal-body">
+        <form id="memberForm">
+          <input type="hidden" id="memberEditId">
+          <div class="form-row">
+            <div class="form-group"><label for="mfName">Full Name *</label><input type="text" id="mfName" required minlength="2" placeholder="e.g. Ramesh Kumar"></div>
+            <div class="form-group"><label for="mfRelation">Relation *</label><input type="text" id="mfRelation" required placeholder="e.g. Father, Mother"></div>
+          </div>
+          <div class="form-row-3">
+            <div class="form-group"><label for="mfAge">Age *</label><input type="number" id="mfAge" required min="0" max="150"></div>
+            <div class="form-group"><label for="mfGender">Gender *</label><select id="mfGender" required><option value="">Select</option><option value="male">Male</option><option value="female">Female</option><option value="other">Other</option></select></div>
+            <div class="form-group"><label for="mfBlood">Blood Type</label><select id="mfBlood"><option value="">Unknown</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+          </div>
+          <div class="form-group"><label for="mfAllergies">Allergies (comma-separated)</label><input type="text" id="mfAllergies" placeholder="e.g. Penicillin, Peanuts"></div>
+          <div class="form-group"><label for="mfConditions">Medical Conditions (comma-separated)</label><input type="text" id="mfConditions" placeholder="e.g. Diabetes, Hypertension"></div>
+          <div class="form-group"><label for="mfMedications">Current Medications (comma-separated)</label><input type="text" id="mfMedications" placeholder="e.g. Metformin, Amlodipine"></div>
+          <div class="form-group"><label for="mfNotes">Health Notes</label><textarea id="mfNotes" placeholder="Any additional health information..."></textarea></div>
+          <div class="form-error" id="memberFormError"></div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" id="memberFormSubmit">Add Member</button>
+            <button type="button" class="btn-secondary" id="memberFormCancel">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── Add/Edit Reminder Modal ─── -->
+  <div class="modal-overlay" id="reminderModal">
+    <div class="modal">
+      <div class="modal-header"><h3 id="reminderModalTitle">Add Medicine Reminder</h3><button class="modal-close" id="reminderModalClose">✕</button></div>
+      <div class="modal-body">
+        <form id="reminderForm">
+          <input type="hidden" id="rfEditId">
+          <input type="hidden" id="rfMemberId">
+          <div class="form-group" id="rfMemberSelectWrap">
+            <label for="rfMemberSelect">For Family Member *</label>
+            <select id="rfMemberSelect" required><option value="">Select member</option></select>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label for="rfMedName">Medicine Name *</label><input type="text" id="rfMedName" required placeholder="e.g. Metformin"></div>
+            <div class="form-group"><label for="rfDosage">Dosage *</label><input type="text" id="rfDosage" required placeholder="e.g. 500mg"></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label for="rfFrequency">Frequency</label><select id="rfFrequency"><option value="daily">Daily</option><option value="twice_daily">Twice Daily</option><option value="thrice_daily">Thrice Daily</option><option value="weekly">Weekly</option><option value="as_needed">As Needed</option></select></div>
+            <div class="form-group"><label for="rfInstructions">Instructions</label><input type="text" id="rfInstructions" placeholder="e.g. Take after meals"></div>
+          </div>
+          <div class="form-group">
+            <label>Timings *</label>
+            <div class="timings-input" id="rfTimings"><input type="time" class="timing-entry" value="08:00"></div>
+            <button type="button" class="add-timing-btn" id="addTimingBtn">+ Add Timing</button>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label for="rfStartDate">Start Date *</label><input type="date" id="rfStartDate" required></div>
+            <div class="form-group"><label for="rfEndDate">End Date (optional)</label><input type="date" id="rfEndDate"></div>
+          </div>
+          <div class="form-error" id="reminderFormError"></div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary" id="reminderFormSubmit">Add Reminder</button>
+            <button type="button" class="btn-secondary" id="reminderFormCancel">Cancel</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script src="api.js"></script>
+  <script src="family.js"></script>
+</body>
+</html>

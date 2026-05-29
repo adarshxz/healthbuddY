@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HealthBuddy — Doctor Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏥</text></svg>">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <nav class="dash-nav">
+    <div class="dash-nav-left"><div class="nav-logo">🏥</div><h1>HealthBuddy</h1><span style="color:var(--text-muted);margin-left:8px">| Doctor Mode</span></div>
+    <div class="dash-nav-right">
+      <a href="/chat" class="nav-btn">💬 Chat</a>
+      <button class="nav-btn logout-nav-btn" id="logoutBtn">🚪 Logout</button>
+    </div>
+  </nav>
+  <div class="dashboard-container">
+    <div class="welcome-section">
+      <div class="welcome-text"><h2>Doctor Dashboard 👨‍⚕️</h2><p>View patient triage records and AI analysis</p></div>
+    </div>
+    <div class="dash-section">
+      <div class="section-header"><h3>📋 Recent Patient Triages</h3></div>
+      <div id="patientRecords" class="data-grid"><div class="loading-state">Loading patient records...</div></div>
+    </div>
+  </div>
+  <script src="api.js"></script>
+  <script>
+    (() => {
+      if (!API.requireDoctor()) return;
+      document.getElementById('logoutBtn')?.addEventListener('click', () => API.logout());
+      loadRecords();
+      async function loadRecords() {
+        try {
+          const data = await API.get('/admin/doctor/patients');
+          const grid = document.getElementById('patientRecords');
+          if (!data?.records?.length) { grid.innerHTML = '<div class="loading-state">No patient records yet</div>'; return; }
+          grid.innerHTML = data.records.map(r => {
+            const cls = r.isEmergency ? 'emergency' : (r.severityScore >= 5 ? 'moderate' : 'mild');
+            const patient = r.userId || {};
+            const sourcesHtml = (r.sources && r.sources.length > 0)
+              ? `<span style="color:#00d4aa;margin-left:12px">📖 Sources: ${r.sources.join(', ')}</span>`
+              : '';
+            return `<div class="data-card"><span class="data-card-icon">${cls === 'emergency' ? '🚨' : cls === 'moderate' ? '⚠️' : '✅'}</span><div class="data-card-info"><div class="data-card-title">👤 ${patient.name || 'Anonymous'} — ${(r.symptoms || []).join(', ')}</div><div class="data-card-meta"><span>📅 ${new Date(r.createdAt).toLocaleString()}</span><span>⚠️ Severity: ${r.severityScore}/10</span><span>🤖 Confidence: ${r.aiConfidence || 85}%</span>${sourcesHtml}</div><div class="data-card-meta" style="margin-top:4px"><span>💡 ${r.recommendation || ''}</span></div></div><span class="data-card-badge badge-${cls}">${cls}</span></div>`;
+          }).join('');
+        } catch { document.getElementById('patientRecords').innerHTML = '<div class="loading-state">Access denied or error loading</div>'; }
+      }
+    })();
+  </script>
+</body>
+</html>
